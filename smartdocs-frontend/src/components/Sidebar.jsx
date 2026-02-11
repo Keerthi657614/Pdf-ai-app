@@ -14,7 +14,7 @@ export default function Sidebar({ darkMode, setDarkMode, onWipe }) {
   useEffect(() => {
     const checkHealth = async () => {
       try {
-        const res = await axios.get("http://localhost:8000/health");
+        const res = await axios.get("https://pdf-ai-app-bm00.onrender.com/health");
         setHealth(res.data.components);
       } catch (err) {
         setHealth({ vector_db: "Offline", openai: "Disconnected" });

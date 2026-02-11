@@ -146,7 +146,7 @@ export default function Header({ onLogout, onOpenProfile }) {
         >
           {profilePic ? (
             <img
-              src={`http://localhost:8000${profilePic}`}
+              src={`https://pdf-ai-app-bm00.onrender.com${profilePic}`}
               alt="profile"
               className="w-full h-full object-cover"
             />

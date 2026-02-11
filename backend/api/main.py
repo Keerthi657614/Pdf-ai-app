@@ -338,6 +338,7 @@ app.add_middleware(
         "http://localhost:5173",
         os.getenv("FRONTEND_URL", "")
     ],
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

@@ -270,7 +270,7 @@ export default function Profile({ user, onUpdate }) {
     formData.append("file", image);
 
     const res = await axios.post(
-      `http://localhost:8000/upload-profile-pic?user=${currentUser}`,
+      `https://pdf-ai-app-bm00.onrender.com/upload-profile-pic?user=${currentUser}`,
       formData,
       { headers: { "Content-Type": "multipart/form-data" } }
     );
@@ -283,7 +283,7 @@ export default function Profile({ user, onUpdate }) {
     e.preventDefault();
     setLoading(true);
     try {
-      const res = await axios.post("http://localhost:8000/update-profile", {
+      const res = await axios.post("https://pdf-ai-app-bm00.onrender.com/update-profile", {
         current_username: user,
         new_username: username !== user ? username : null,
         new_password: password || null

@@ -7,7 +7,7 @@ export default function SystemHealth() {
 
   useEffect(() => {
     axios
-      .get("http://localhost:8000/health")
+      .get("https://pdf-ai-app-bm00.onrender.com/health")
       .then((res) => setHealth(res.data.components))
       .catch(() => setError("Unable to fetch system health"));
   }, []);

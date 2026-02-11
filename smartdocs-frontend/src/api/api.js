@@ -29,7 +29,7 @@
 import axios from "axios";
 
 const API = axios.create({
-  baseURL: "http://localhost:8000", // FastAPI
+  baseURL: "https://pdf-ai-app-bm00.onrender.com/", // FastAPI
 });
 
 // ---------- Upload PDFs ----------

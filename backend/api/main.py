@@ -334,6 +334,7 @@ app.mount("/profile_pics", StaticFiles(directory=PROFILE_PICS_DIR), name="profil
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
+        "https://pdf-ai-app-1.onrender.com",
         "http://localhost:5173",
         os.getenv("FRONTEND_URL", "")
     ],

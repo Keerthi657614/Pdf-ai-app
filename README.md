@@ -1,110 +1,114 @@
-# 📘 SmartDocs AI – Intelligent PDF Q&A System (RAG-Based)
+# 📘 SmartDocs AI – Intelligent Multi-Document Q&A System (RAG-Based)
 
-## 🚀 Overview
+## 🚀 Project Overview
 
-SmartDocs AI is a Retrieval-Augmented Generation (RAG) system that allows users to upload multiple PDF documents and ask intelligent, context-aware questions.
+SmartDocs AI is a full-stack Retrieval-Augmented Generation (RAG) system that enables users to upload multiple PDF documents and ask context-aware questions.
 
-The system extracts text, cleans it, chunks it with overlap, generates embeddings, stores them in ChromaDB, performs similarity search, and generates grounded responses using OpenAI.
+The system extracts text from PDFs, preprocesses it, creates embeddings, stores them in ChromaDB, retrieves relevant chunks using cosine similarity, and generates grounded responses using OpenAI.
 
-All answers are generated strictly from retrieved document context with proper source attribution.
+All responses are generated strictly from retrieved document context with structured source attribution.
 
+---
+
+## 🏗️ System Architecture
+```
+User  
+↓  
+React Frontend (smartdocs-frontend)  
+↓  
+Python Backend API  
+↓  
+PDF Processing Pipeline  
+↓  
+Embedding Generation (OpenAI)  
+↓  
+ChromaDB (Persistent Vector Storage)  
+↓  
+Similarity Search  
+↓  
+Context-Aware GPT Response  
+```
 ---
 
 ## 🎯 Key Features
 
-- 📂 Multi-PDF Upload
-- 🧠 Intelligent Text Chunking (Token + Sentence Based)
-- 🔎 Cosine Similarity Search
-- 🗃️ Persistent ChromaDB Vector Storage
-- 🧾 Context-Aware GPT Responses
-- 📌 Source Attribution with Page Numbers
-- 📊 Document Contribution Visualization
-- 📄 Integrated PDF Viewer
-- 💬 Session Management & Chat History
-- 💾 Export Q&A (TXT / Markdown / PDF)
-- ⚡ Performance Optimization & Caching
-- 🛡️ Robust Error Handling
-- 🧪 Unit & Integration Testing (pytest)
+- Multi-PDF upload
+- Text extraction (PyMuPDF + pdfplumber)
+- Token-based chunking with overlap
+- 1536-dimensional OpenAI embeddings
+- Persistent ChromaDB storage
+- Cosine similarity search
+- Threshold filtering
+- Context-aware response generation
+- Structured citation extraction
+- Source contribution visualization
+- Session management
+- Export Q&A history
+- Unit + Integration testing (pytest)
 
----
-```
-PDF Upload
-↓
-PDFProcessor
-↓
-TextCleaner
-↓
-TextChunker
-↓
-EmbeddingGenerator
-↓
-ChromaDB
-↓
-SearchEngine
-↓
-QAEngine
-↓
-React UI
-```
 ---
 
 ## 🛠️ Tech Stack
 
-**Backend**
+### Backend
 - Python 3.8+
 - OpenAI API
 - ChromaDB
 - PyMuPDF
 - pdfplumber
-- LangChain
 - tiktoken
 - python-dotenv
+- pytest
+- FastAPI (or your API framework)
 
-**Frontend**
-- Streamlit
+### Frontend
+- React (Vite / CRA)
+- Axios / Fetch API
 
 ---
 
-## ⚙️ Installation
+## ⚙️ Local Setup
 
-### Clone Repository
+### Backend
+
 ```bash
-git clone https://github.com/Keerthi657614/SmartDocs-AI.git
-cd SmartDocs-AI
-```
-Create Virtual Environment
+cd backend
 python -m venv venv
-Activate:
-
-Windows:
-```bash
-venv\Scripts\activate
-```
-MAC/Linux
-``` bash
-source venv/bin/activate
-
-```
-Install Dependencies
+venv\Scripts\activate  # Windows
 pip install -r requirements.txt
-🔑 Environment Variables
+```
+Create .env:
+```
+OPENAI_API_KEY=your_key_here
 
-Create .env file in root directory:
 ```
-OPENAI_API_KEY=your_openai_api_key_here
+Run backend:
 ```
-▶️ Run Application
+uvicorn main:app --reload
+```
+
+Backend runs at:
+```
+http://localhost:8000
+```
+Frontend
+```
 cd smartdocs-frontend
+npm install
 npm run dev
+```
 
+Set environment variable:
+```
+VITE_API_BASE_URL=http://localhost:8000
+```
 
-App will open at:
+Frontend runs at:
 ```
 http://localhost:5173
 ```
+
+
 👤 Author
 
 Keerthi Mittapalli
-AI & ML Student
-## 🏗️ Architecture
-

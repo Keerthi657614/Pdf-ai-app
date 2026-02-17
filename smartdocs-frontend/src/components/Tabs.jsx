@@ -1,36 +1,3 @@
-// export default function Tabs({ tab, setTab }) {
-//   const tabs = ["Ingestion", "Chat", "History", "Analytics"];
-
-//   return (
-//     <div className="glass flex gap-2 p-2 rounded-xl">
-//       {tabs.map((t) => (
-//         <button
-//           key={t}
-//           onClick={() => setTab(t)}
-//           className={`px-4 py-2 rounded-lg ${
-//             tab === t
-//               ? "bg-accent/20 text-accent"
-//               : "text-slate-400 hover:text-white"
-//           }`}
-//         >
-//           <i
-//             className={`fas ${
-//               t === "Ingestion"
-//                 ? "fa-upload"
-//                 : t === "Chat"
-//                 ? "fa-comment"
-//                 : t === "History"
-//                 ? "fa-clock"
-//                 : "fa-chart-bar"
-//             } mr-2`}
-//           />
-//           {t}
-//         </button>
-//       ))}
-//     </div>
-//   );
-// }
-
 import React from 'react';
 
 export default function Tabs({ activeTab, setActiveTab, isSidebarOpen }) {

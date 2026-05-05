@@ -1,26 +1,18 @@
-import time
+import os
 import json
 import hashlib
-from datetime import datetime
-import google.generativeai as genai
-from dotenv import load_dotenv
-import os
+from sentence_transformers import SentenceTransformer
 
 
 class EmbeddingGenerator:
-    def __init__(self, model_name="models/embedding-001", cache_path="data/embedding_cache.json"):
-        load_dotenv()
-        api_key = os.getenv("GEMINI_API_KEY")
+    def __init__(self, cache_path="data/embedding_cache.json"):
+        # ✅ Local embedding model (fast + reliable)
+        self.model = SentenceTransformer("all-MiniLM-L6-v2")
 
-        if not api_key:
-            raise RuntimeError("GEMINI_API_KEY not found")
-
-        genai.configure(api_key=api_key)
-
-        self.model_name = model_name
         self.cache_path = cache_path
         self.cache = self._load_cache()
 
+    # ---------------- CACHE ----------------
     def _load_cache(self):
         try:
             with open(self.cache_path, "r", encoding="utf-8") as f:
@@ -36,53 +28,43 @@ class EmbeddingGenerator:
     def _hash_text(self, text):
         return hashlib.sha256(text.encode()).hexdigest()
 
-    def _retry_request(self, func, retries=3):
-        delay = 1
-        for i in range(retries):
-            try:
-                return func()
-            except Exception as e:
-                if i == retries - 1:
-                    raise RuntimeError(str(e))
-                time.sleep(delay)
-                delay *= 2
-
+    # ---------------- EMBEDDING ----------------
     def generate_embedding(self, text):
-        if not text.strip():
+        if not text or not text.strip():
             raise ValueError("Empty text")
 
         key = self._hash_text(text)
 
+        # ✅ Use cache
         if key in self.cache:
             return self.cache[key]
 
-        def api_call():
-            return genai.embed_content(
-                model=self.model_name,
-                content=text
-            )
-
-        response = self._retry_request(api_call)
-
-        embedding = response["embedding"]
+        # ✅ Generate embedding locally
+        embedding = self.model.encode(text).tolist()
 
         if not embedding:
-            raise RuntimeError("Invalid embedding")
+            raise RuntimeError("Embedding generation failed")
 
+        # ✅ Save to cache
         self.cache[key] = embedding
         self._save_cache()
 
         return embedding
 
+    # ---------------- BATCH ----------------
     def generate_batch_embeddings(self, chunks):
         results = []
 
         for chunk in chunks:
             emb = self.generate_embedding(chunk["text"])
-            results.append({"chunk": chunk, "embedding": emb})
+            results.append({
+                "chunk": chunk,
+                "embedding": emb
+            })
 
         return results
 
+    # ---------------- PREPARE FOR DB ----------------
     def prepare_embedding_data(self, embedded_chunks):
         final = []
 

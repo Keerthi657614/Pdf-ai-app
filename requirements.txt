@@ -4,38 +4,36 @@ python-dotenv==1.2.1
 pydantic==2.12.5
 typing_extensions==4.15.0
 
-# ================= DATABASE =================
+# DB
 chromadb==1.4.0
 
-# ================= PDF PROCESSING =================
+# PDF
 PyMuPDF==1.26.7
 pdfplumber==0.11.9
 
-# ================= AI (Gemini for QA) =================
+# Gemini
 google-generativeai==0.8.5
 google-api-core==2.30.3
 google-auth==2.50.0
 googleapis-common-protos==1.72.0
 protobuf==5.29.5
 
-# ================= EMBEDDINGS (HuggingFace) =================
+# Embeddings (FIXED)
 sentence-transformers==2.7.0
-transformers==4.41.2
+transformers==4.38.2
 huggingface_hub==0.23.4
-tokenizers==0.19.1
-torch==2.2.2
 
-# ================= UTILITIES =================
+# Utils
 numpy==2.4.0
 requests==2.32.5
 tqdm==4.67.1
 
-# ================= AUTH =================
+# Auth
 passlib==1.7.4
 bcrypt==4.0.1
 
-# ================= FILE UPLOAD =================
+# Upload
 python-multipart==0.0.22
 
-# ================= OPTIONAL (logging/support) =================
+# Optional
 rich==14.2.0

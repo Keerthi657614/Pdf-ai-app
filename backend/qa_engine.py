@@ -1,36 +1,49 @@
+# import re  # Added missing import to fix NameError
+# import logging
 # from typing import List, Dict
 # from backend.openai_helper import OpenAIHelper
 # from utils.error_handler import retry_on_failure, APIError
 
+# # Setup logger for Task 15 centralized logging
+# logger = logging.getLogger(__name__)
+
 # class QAEngine:
 #     def __init__(self):
+#         """Initializes the LLM client."""
 #         self.client = OpenAIHelper()
 
-#     def format_context(self, chunks):
+#     def format_context(self, chunks: List[Dict]) -> str:
 #         """Formats retrieved chunks for the LLM prompt."""
 #         return "\n\n".join(
 #             f"[Source: {c['source_file']}, Page: {c['page_number']}]\n{c['chunk_text']}"
 #             for c in chunks
 #         )
 
-#     def parse_citations(self, text):
-#         """Extracts citations using regex to match the required format."""
+#     def parse_citations(self, text: str) -> List[Dict]:
+#         """Extracts citations using regex to match the required format [Source: ..., Page: ...]."""
+#         # This requires the 'import re' added at the top
 #         return [
 #             {"source_file": f, "page_number": int(p)}
 #             for f, p in re.findall(r"\[Source:\s*(.*?),\s*Page:\s*(\d+)\]", text)
 #         ]
 
 #     @retry_on_failure(retries=3, delay=5)
-#     def _call_llm(self, messages):
+#     def _call_llm(self, messages: List[Dict]) -> str:
+#         """Calls the LLM with automatic retry logic and 30s timeout (Task 15)."""
 #         return self.client.get_completion(messages, timeout=30)
 
-#     def generate_answer(self, question, retrieved_chunks, conversation_history=None):
+#     def generate_answer(self, question: str, retrieved_chunks: List[Dict], conversation_history: List[Dict] = None) -> Dict:
+#         """
+#         Generates an answer based on retrieved context with citation parsing.
+#         Includes graceful degradation and error handling (Task 15).
+#         """
 #         if not retrieved_chunks:
+#             logger.warning(f"No chunks retrieved for question: {question}")
 #             return {"answer": "Answer not found in documents.", "citations": []}
 
 #         context = self.format_context(retrieved_chunks)
 
-#         # Updated system prompt to ensure citations are parseable
+#         # System prompt ensures the LLM uses a parseable citation format
 #         messages = [{
 #             "role": "system",
 #             "content": (
@@ -40,6 +53,7 @@
 #             )
 #         }]
 
+#         # Include last 3 exchanges for context-aware Q&A
 #         if conversation_history:
 #             for h in conversation_history[-3:]:
 #                 messages.append({"role": "user", "content": h["question"]})
@@ -48,24 +62,34 @@
 #         messages.append({"role": "user", "content": f"Context:\n{context}\n\nQ: {question}"})
 
 #         try:
+#             # LLM Call with Task 15 retry and timeout constraints
 #             text = self._call_llm(messages)
 #             citations = self.parse_citations(text)
 #             return {"answer": text, "citations": citations}
-#         except APIError:
-#             return {"answer": "AI service unavailable.", "citations": []}
-import re  # Added missing import to fix NameError
+        
+#         except APIError as ae:
+#             # Task 15: Graceful error handling for API failures
+#             logger.error(f"API Error in QAEngine: {ae}")
+#             return {"answer": "AI service unavailable. Please check your connection or API credits.", "citations": []}
+        
+#         except Exception as e:
+#             # Catch-all for unexpected issues to prevent app crash
+#             logger.error(f"Unexpected error in QAEngine: {e}")
+#             return {"answer": "An unexpected error occurred while generating the answer.", "citations": []}
+
+import re
 import logging
 from typing import List, Dict
-from backend.openai_helper import OpenAIHelper
+from backend.openai_helper import GeminiAIHelper
 from utils.error_handler import retry_on_failure, APIError
 
-# Setup logger for Task 15 centralized logging
+# Setup logger
 logger = logging.getLogger(__name__)
 
 class QAEngine:
     def __init__(self):
-        """Initializes the LLM client."""
-        self.client = OpenAIHelper()
+        """Initializes the Gemini LLM client."""
+        self.client = GeminiAIHelper()
 
     def format_context(self, chunks: List[Dict]) -> str:
         """Formats retrieved chunks for the LLM prompt."""
@@ -75,8 +99,7 @@ class QAEngine:
         )
 
     def parse_citations(self, text: str) -> List[Dict]:
-        """Extracts citations using regex to match the required format [Source: ..., Page: ...]."""
-        # This requires the 'import re' added at the top
+        """Extracts citations using regex."""
         return [
             {"source_file": f, "page_number": int(p)}
             for f, p in re.findall(r"\[Source:\s*(.*?),\s*Page:\s*(\d+)\]", text)
@@ -84,21 +107,36 @@ class QAEngine:
 
     @retry_on_failure(retries=3, delay=5)
     def _call_llm(self, messages: List[Dict]) -> str:
-        """Calls the LLM with automatic retry logic and 30s timeout (Task 15)."""
-        return self.client.get_completion(messages, timeout=30)
+        """
+        Calls Gemini LLM with retry logic.
+        Converts chat messages into a single prompt string.
+        """
+        prompt = "\n".join(
+            f"{m['role'].upper()}: {m['content']}"
+            for m in messages
+        )
 
-    def generate_answer(self, question: str, retrieved_chunks: List[Dict], conversation_history: List[Dict] = None) -> Dict:
+        return self.client.get_completion(prompt)
+
+    def generate_answer(
+        self,
+        question: str,
+        retrieved_chunks: List[Dict],
+        conversation_history: List[Dict] = None
+    ) -> Dict:
         """
-        Generates an answer based on retrieved context with citation parsing.
-        Includes graceful degradation and error handling (Task 15).
+        Generates answer using Gemini + retrieved context
         """
+
         if not retrieved_chunks:
             logger.warning(f"No chunks retrieved for question: {question}")
-            return {"answer": "Answer not found in documents.", "citations": []}
+            return {
+                "answer": "Answer not found in documents.",
+                "citations": []
+            }
 
         context = self.format_context(retrieved_chunks)
 
-        # System prompt ensures the LLM uses a parseable citation format
         messages = [{
             "role": "system",
             "content": (
@@ -108,26 +146,37 @@ class QAEngine:
             )
         }]
 
-        # Include last 3 exchanges for context-aware Q&A
+        # Include last 3 conversation turns
         if conversation_history:
             for h in conversation_history[-3:]:
                 messages.append({"role": "user", "content": h["question"]})
                 messages.append({"role": "assistant", "content": h["answer"]})
 
-        messages.append({"role": "user", "content": f"Context:\n{context}\n\nQ: {question}"})
+        # Add final query
+        messages.append({
+            "role": "user",
+            "content": f"Context:\n{context}\n\nQ: {question}"
+        })
 
         try:
-            # LLM Call with Task 15 retry and timeout constraints
             text = self._call_llm(messages)
             citations = self.parse_citations(text)
-            return {"answer": text, "citations": citations}
-        
+
+            return {
+                "answer": text,
+                "citations": citations
+            }
+
         except APIError as ae:
-            # Task 15: Graceful error handling for API failures
             logger.error(f"API Error in QAEngine: {ae}")
-            return {"answer": "AI service unavailable. Please check your connection or API credits.", "citations": []}
-        
+            return {
+                "answer": "AI service unavailable. Please check your connection or API credits.",
+                "citations": []
+            }
+
         except Exception as e:
-            # Catch-all for unexpected issues to prevent app crash
             logger.error(f"Unexpected error in QAEngine: {e}")
-            return {"answer": "An unexpected error occurred while generating the answer.", "citations": []}
+            return {
+                "answer": "An unexpected error occurred while generating the answer.",
+                "citations": []
+            }

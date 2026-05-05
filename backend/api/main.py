@@ -330,14 +330,20 @@ for d in [UPLOAD_DIR, SESSIONS_DIR, PROFILE_PICS_DIR]:
 app.mount("/uploads", StaticFiles(directory=UPLOAD_DIR), name="uploads")
 app.mount("/profile_pics", StaticFiles(directory=PROFILE_PICS_DIR), name="profile_pics")
 
-# ================= CORS =================
+# ================= CORS ================
+# ================= CORS FIX =================
+origins = [
+    "https://pdf-ai-app-1.onrender.com",
+    "http://localhost:5173"
+]
+
+frontend_env = os.getenv("FRONTEND_URL")
+if frontend_env:
+    origins.append(frontend_env)
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "https://pdf-ai-app-1.onrender.com",
-        "http://localhost:5173",
-        os.getenv("FRONTEND_URL", "")
-    ],
+    allow_origins=origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -631,6 +637,6 @@ def health():
         "status": "ok",
         "components": {
             "vector_db": db,
-            "openai": "Connected" if os.getenv("OPENAI_API_KEY") else "Missing"
+            "gemini": "Connected" if os.getenv("GEMINI_API_KEY") else "Missing"
         }
     }

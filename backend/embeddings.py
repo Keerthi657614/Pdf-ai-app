@@ -8,7 +8,7 @@ import os
 
 
 class EmbeddingGenerator:
-    def __init__(self, model_name="models/text-embedding-004", cache_path="data/embedding_cache.json"):
+    def __init__(self, model_name="models/embedding-001", cache_path="data/embedding_cache.json"):
         load_dotenv()
         api_key = os.getenv("GEMINI_API_KEY")
 

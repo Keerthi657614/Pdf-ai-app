@@ -3,7 +3,7 @@ uvicorn==0.40.0
 python-dotenv==1.2.1
 pydantic==2.12.5
 typing_extensions==4.15.0
-
+tiktoken==0.7.0
 # DB
 chromadb==1.4.0
 
